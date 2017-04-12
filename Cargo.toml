@@ -1,0 +1,6 @@
+[package]
+name = "nsq"
+version = "0.0.1"
+authors = ["Garrett Squire <garrettsquire@gmail.com>"]
+
+[dependencies]
