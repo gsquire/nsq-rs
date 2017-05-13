@@ -2,6 +2,7 @@
 //! can contain.
 
 /// NsqConfig contains values supported by `nsqd` for consumers.
+#[derive(Debug)]
 pub struct NsqConfig {
     max_in_flight: usize,
 }
