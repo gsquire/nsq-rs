@@ -1,5 +1,6 @@
 //! The configuration module represents the various options that an NSQ consumer
 //! can contain.
+#![deny(missing_docs)]
 
 /// NsqConfig contains values supported by `nsqd` for consumers.
 #[derive(Debug)]
