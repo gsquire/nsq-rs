@@ -15,7 +15,7 @@ pub struct Consumer {
     channel: String,
     config: NsqConfig,
     conn: Option<NsqConn>,
-    handler: Option<Box<Handler<'static>>>,
+    handler: Option<Box<Handler>>,
     topic: String,
 }
 
@@ -39,7 +39,7 @@ impl Consumer {
     }
 
     /// Add a handler for messages that are consumed.
-    pub fn add_handler<H>(&mut self, handler: H) where H: Handler<'static> + 'static {
+    pub fn add_handler<H>(&mut self, handler: H) where H: Handler + 'static {
         self.handler = Some(Box::new(handler));
     }
 }

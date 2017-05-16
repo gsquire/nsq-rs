@@ -8,4 +8,5 @@ documentation = "https://docs.rs/nsq"
 license = "MIT"
 
 [dependencies]
+bytes = "0.4"
 tokio-core = "0.1"

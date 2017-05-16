@@ -1,4 +1,5 @@
 /// This crate offers a high-level API for the `nsq` daemon.
+extern crate bytes;
 extern crate tokio_core;
 
 pub mod config;
