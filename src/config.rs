@@ -8,14 +8,15 @@ pub struct NsqConfig {
     max_in_flight: usize,
 }
 
-impl NsqConfig {
-    /// Return a default NsqConfig with sensible defaults.
-    pub fn new() -> NsqConfig {
+impl Default for NsqConfig {
+    fn default() -> NsqConfig {
         NsqConfig {
             max_in_flight: 1,
         }
     }
+}
 
+impl NsqConfig {
     /// Set the maximum number of messages a consumer can handle before `nsqd`
     /// expects a response.
     pub fn max_in_fligh<'a>(&'a mut self, mif: usize) -> &'a mut NsqConfig {
