@@ -8,5 +8,9 @@ documentation = "https://docs.rs/nsq"
 license = "MIT"
 
 [dependencies]
+byteorder = "1"
 bytes = "0.4"
+derive_builder = { version = "0.4", features = ["private_fields"] }
+futures = "0.1"
 tokio-core = "0.1"
+tokio-io = "0.1"

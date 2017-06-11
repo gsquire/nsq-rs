@@ -12,8 +12,10 @@ use errors::{NsqError, NsqResult};
 /// handling.
 #[derive(Debug)]
 pub struct NsqConn {
-    socket: TcpStream,
-    event_loop: Core,
+    /// The TCP connection to nsqd.
+    pub socket: TcpStream,
+    /// The event loop created from tokio.
+    pub event_loop: Core,
 }
 
 impl NsqConn {
