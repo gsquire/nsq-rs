@@ -25,8 +25,13 @@ impl NsqConn {
 
         let tcp = TcpStream::connect(addr);
         match tcp {
-            Ok(t) => { Ok(NsqConn { socket: t, event_loop: core }) },
-            Err(e) => { Err(NsqError::Io(e)) },
+            Ok(t) => {
+                Ok(NsqConn {
+                       socket: t,
+                       event_loop: core,
+                   })
+            }
+            Err(e) => Err(NsqError::Io(e)),
         }
     }
 }

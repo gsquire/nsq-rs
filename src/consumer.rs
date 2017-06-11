@@ -47,7 +47,9 @@ impl Consumer {
     }
 
     /// Add a handler for messages that are consumed.
-    pub fn add_handler<H>(&mut self, handler: H) where H: Handler + 'static {
+    pub fn add_handler<H>(&mut self, handler: H)
+        where H: Handler + 'static
+    {
         self.handler = Some(Box::new(handler));
     }
 
@@ -55,8 +57,11 @@ impl Consumer {
     /// to take ownership of the internal connection.
     pub fn begin_consuming(self) -> NsqResult<()> {
         match self.conn {
-            Some(_) => { self.read_loop(); Ok(()) },
-            None => { Err(NsqError::InvalidConn) }
+            Some(_) => {
+                self.read_loop();
+                Ok(())
+            }
+            None => Err(NsqError::InvalidConn),
         }
     }
 }
@@ -80,45 +85,47 @@ impl Consumer {
         let subscribe = format!("SUB {} {}\n", self.topic, self.channel);
         let ready_count = format!("RDY {}\n", self.config.max_in_flight());
 
-        let prelude = write_all(stream_write, b"  V2").and_then(|(stream, _)| {
-            write_all(stream, subscribe.as_bytes())
-        }).and_then(|(stream, _)| {
-            write_all(stream, ready_count.as_bytes())
-        });
+        let prelude = write_all(stream_write, b"  V2")
+            .and_then(|(stream, _)| write_all(stream, subscribe.as_bytes()))
+            .and_then(|(stream, _)| write_all(stream, ready_count.as_bytes()));
 
         let framed_writer = FramedWrite::new(framed_sock, NsqResponder::default());
-        let framed_read = length_delimited::Builder::new().length_field_length(4).new_read(stream_read);
+        let framed_read = length_delimited::Builder::new()
+            .length_field_length(4)
+            .new_read(stream_read);
         let handler = self.handler;
-        let reader = framed_read.map(|mut buf| {
-            let frame_type = BigEndian::read_i32(buf.as_ref());
-            // Ditch the frame type.
-            buf.split_to(4);
-            let mut response = MessageReply::Nop;
+        let reader = framed_read
+            .map(|mut buf| {
+                let frame_type = BigEndian::read_i32(buf.as_ref());
+                // Ditch the frame type.
+                buf.split_to(4);
+                let mut response = MessageReply::Nop;
 
-            // TODO: Handle other frame types and consider constants for reading the bytes.
-            if frame_type == 2 {
-                let time_bytes = buf.split_to(8);
-                let time = BigEndian::read_i64(time_bytes.as_ref());
+                // TODO: Handle other frame types and consider constants for reading the bytes.
+                if frame_type == 2 {
+                    let time_bytes = buf.split_to(8);
+                    let time = BigEndian::read_i64(time_bytes.as_ref());
 
-                let attempt_bytes = buf.split_to(2);
-                let attempts = BigEndian::read_u16(attempt_bytes.as_ref());
+                    let attempt_bytes = buf.split_to(2);
+                    let attempts = BigEndian::read_u16(attempt_bytes.as_ref());
 
-                let id = buf.split_to(16);
-                let message = MessageBuilder::default()
-                    .timestamp(time)
-                    .attempts(attempts)
-                    .id(id)
-                    .body(buf)
-                    .build()
-                    .unwrap();
-                match handler {
-                    Some(ref h) => response = h.handle_message(&message),
-                    None => {},
+                    let id = buf.split_to(16);
+                    let message = MessageBuilder::default()
+                        .timestamp(time)
+                        .attempts(attempts)
+                        .id(id)
+                        .body(buf)
+                        .build()
+                        .unwrap();
+                    match handler {
+                        Some(ref h) => response = h.handle_message(&message),
+                        None => {}
+                    }
                 }
-            }
 
-            response
-        }).forward(framed_writer);
+                response
+            })
+            .forward(framed_writer);
 
         conn.event_loop.run(prelude.join(reader)).unwrap();
     }

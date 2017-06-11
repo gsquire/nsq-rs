@@ -9,9 +9,7 @@ pub struct NsqConfig {
 
 impl Default for NsqConfig {
     fn default() -> NsqConfig {
-        NsqConfig {
-            max_in_flight: 1,
-        }
+        NsqConfig { max_in_flight: 1 }
     }
 }
 

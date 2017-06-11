@@ -23,7 +23,7 @@ pub enum MessageReply {
     /// `Touch` tells the consumer to touch the message updating the TTL.
     Touch(BytesMut),
     /// `Nop` is typically used only for heartbeats.
-    Nop
+    Nop,
 }
 
 /// Handler is a trait that a type must implement to handle messages from a consumer.
@@ -43,7 +43,7 @@ impl Encoder for NsqResponder {
     fn encode(&mut self, item: Self::Item, dst: &mut BytesMut) -> Result<(), Self::Error> {
         match item {
             MessageReply::Nop => dst.put("NOP\n"),
-            _ => {},
+            _ => {}
         }
         Ok(())
     }
