@@ -27,9 +27,9 @@ impl NsqConn {
         match tcp {
             Ok(t) => {
                 Ok(NsqConn {
-                       socket: t,
-                       event_loop: core,
-                   })
+                    socket: t,
+                    event_loop: core,
+                })
             }
             Err(e) => Err(NsqError::Io(e)),
         }

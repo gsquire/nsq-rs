@@ -14,6 +14,16 @@ pub struct Message {
     attempts: u16,
 }
 
+impl Message {
+    pub fn id(&self) -> BytesMut {
+        self.id.clone()
+    }
+
+    pub fn body(&self) -> BytesMut {
+        self.body.clone()
+    }
+}
+
 /// `MessageReply` tells nsqd what to do with the message that was previously consumed.
 pub enum MessageReply {
     /// `Fin` tells the consumer to finish a message.
@@ -43,6 +53,11 @@ impl Encoder for NsqResponder {
     fn encode(&mut self, item: Self::Item, dst: &mut BytesMut) -> Result<(), Self::Error> {
         match item {
             MessageReply::Nop => dst.put("NOP\n"),
+            MessageReply::Fin(id) => {
+                dst.put("FIN ");
+                dst.put(id);
+                dst.put("\n");
+            }
             _ => {}
         }
         Ok(())

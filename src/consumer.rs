@@ -48,7 +48,8 @@ impl Consumer {
 
     /// Add a handler for messages that are consumed.
     pub fn add_handler<H>(&mut self, handler: H)
-        where H: Handler + 'static
+    where
+        H: Handler + 'static,
     {
         self.handler = Some(Box::new(handler));
     }
@@ -81,7 +82,7 @@ impl Consumer {
         // The socket for our framed writer that will handle message finishing or re-queuing.
         let framed_sock = TokioTcp::from_stream(sock_clone, &conn.event_loop.handle()).unwrap();
 
-        // Write out the config if ther are any values and subscribe to a channel and topic.
+        // Write out the config if there are any values and subscribe to a channel and topic.
         let subscribe = format!("SUB {} {}\n", self.topic, self.channel);
         let ready_count = format!("RDY {}\n", self.config.max_in_flight());
 

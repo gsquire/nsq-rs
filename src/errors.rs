@@ -6,6 +6,7 @@ use std::io;
 
 /// `NsqError` is a variant of errors that can happen when interacting with an
 /// nsqd instance.
+#[derive(Debug)]
 pub enum NsqError {
     /// `Io` wraps an `std::io::Error`.
     Io(io::Error),
