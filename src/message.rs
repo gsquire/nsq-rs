@@ -15,12 +15,24 @@ pub struct Message {
 }
 
 impl Message {
+    /// The unique message ID which is used to reply back to nsqd.
     pub fn id(&self) -> BytesMut {
         self.id.clone()
     }
 
+    /// The body of the message.
     pub fn body(&self) -> BytesMut {
         self.body.clone()
+    }
+
+    /// This is the timestamp of the message.
+    pub fn timestamp(&self) -> i64 {
+        self.timestamp
+    }
+
+    /// Return the number of attempts that nsqd made to deliver the message.
+    pub fn attempts(&self) -> u16 {
+        self.attempts
     }
 }
 
