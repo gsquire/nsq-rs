@@ -64,8 +64,16 @@ impl Encoder for NsqResponder {
 
     fn encode(&mut self, item: Self::Item, dst: &mut BytesMut) -> Result<(), Self::Error> {
         match item {
-            MessageReply::Nop => dst.put("NOP\n"),
+            MessageReply::Nop => {
+                if dst.remaining_mut() < 4{
+                    dst.reserve(4);
+                }
+                dst.put("NOP\n");
+            }
             MessageReply::Fin(id) => {
+                if dst.remaining_mut() < 21{
+                    dst.reserve(21);
+                }
                 dst.put("FIN ");
                 dst.put(id);
                 dst.put("\n");
