@@ -5,6 +5,9 @@ use std::io;
 use bytes::{BufMut, BytesMut};
 use tokio_io::codec::Encoder;
 
+const BUFFER_GROW: usize = 1024;
+const SPACE_NEEDED: usize = 32;
+
 /// `Message` represents a message on the wire.
 #[derive(Builder, Debug)]
 pub struct Message {
@@ -54,6 +57,28 @@ pub trait Handler {
     fn handle_message(&self, message: &Message) -> MessageReply;
 }
 
+fn put_nop(dst: &mut BytesMut) {
+    dst.put("NOP\n");
+}
+
+fn put_fin(dst: &mut BytesMut, id: &BytesMut) {
+    dst.put("FIN ");
+    dst.put(id);
+    dst.put("\n");
+}
+
+fn put_req(dst: &mut BytesMut, id: &BytesMut) {
+    dst.put("REQ ");
+    dst.put(id);
+    dst.put("\n");
+}
+
+fn put_touch(dst: &mut BytesMut, id: &BytesMut) {
+    dst.put("TOUCH ");
+    dst.put(id);
+    dst.put("\n");
+}
+
 /// NsqResponder is used to write back to nsqd.
 #[derive(Default)]
 pub struct NsqResponder;
@@ -63,14 +88,14 @@ impl Encoder for NsqResponder {
     type Error = io::Error;
 
     fn encode(&mut self, item: Self::Item, dst: &mut BytesMut) -> Result<(), Self::Error> {
+        if dst.remaining_mut() < SPACE_NEEDED {
+            dst.reserve(BUFFER_GROW);
+        }
         match item {
-            MessageReply::Nop => dst.put("NOP\n"),
-            MessageReply::Fin(id) => {
-                dst.put("FIN ");
-                dst.put(id);
-                dst.put("\n");
-            }
-            _ => {}
+            MessageReply::Nop => put_nop(dst),
+            MessageReply::Fin(ref id) => put_fin(dst, id),
+            MessageReply::Req(ref id) => put_req(dst, id),
+            MessageReply::Touch(ref id) => put_touch(dst, id),
         }
         Ok(())
     }
