@@ -118,9 +118,8 @@ impl Consumer {
                         .body(buf)
                         .build()
                         .unwrap();
-                    match handler {
-                        Some(ref h) => response = h.handle_message(&message),
-                        None => {}
+                    if let Some(ref h) = handler {
+                        response = h.handle_message(&message);
                     }
                 }
 
